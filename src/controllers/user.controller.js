@@ -284,11 +284,11 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
      if (!avatar.url) {
           throw new apiError(400, "error while uploading on avatar")
      }
-      user.avatar=avatar;
-      await user.save({validateBeforeSave:false})
+     user.avatar = avatar;
+     await user.save({ validateBeforeSave: false })
      return res.status(200)
           .json(new apiResponse(200, user, "avatar update successfully"))
-     
+
 });
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
@@ -314,9 +314,78 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
      return res.status(200)
           .json(new apiResponse(200, user, "cover Image update successfully"))
-})
+});
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+     const { username } = req.params;
+     if (!username?.trim()) {
+          throw new apiError(400, "username is required")
+     }
+
+     const channel = await User.aggregate([
+          {
+               $match: {
+                    username: username?.toLowerCase()
+               }
+          },
+          {
+               $lookup: {
+                    from: "subscriptions",
+                    localField: "_id",
+                    foreignField: "channel",
+                    as: "subscribers"
+               }
+          },
+          {
+               $lookup: {
+                    from: "subscriptions",
+                    localField: "_id",
+                    foreignField: "subscriber",
+                    as: "subscribedTo"
+               }
+          },
+          {
+               $addField: {
+                    subscriberCount: {
+                         $size: "$subscribers"
+                    },
+                    channelsSubcribedToCount: {
+                         $size: "$subscribedTo"
+                    },
+                    isSubcribed:
+                    {
+                         $cond: {
+                              if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                              then:true,
+                              else:false,
+                         }
+                    }
+               }
+          },
+          {
+               $project:{
+                    fullname:1,
+                    username:1,
+                    subscriberCount:1,
+                    channelsSubcribedToCount:1,
+                    isSubcribed:1,
+                    avatar:1,
+                    coverImage:1,
+                    email:1,
+
+               }
+          }
+     ]);
+    
+     if (!channel?.length) {
+          throw new apiError(404,"channel does not exists")
+     }
+
+     return res.status(200).json(new apiResponse(200,channel[0],"User channel fetch successfully"));
+
+});
 export {
      registerUser,
-     loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage
+     loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage, getUserChannelProfile
 };
 
