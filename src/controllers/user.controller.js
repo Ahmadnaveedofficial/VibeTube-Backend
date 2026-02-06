@@ -5,6 +5,7 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 import apiResponse from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import deleteFromCloudinary from '../utils/deleteFromCloudinary.js';
+import mongoose from 'mongoose';
 
 const generateAccessAndRefreshTokens = async (userId) => {
      try {
@@ -153,8 +154,11 @@ const logoutUser = asyncHandler(async (req, res) => {
 
      await User.findByIdAndUpdate(
           req.user._id, {
-          $set: {
-               refreshToken: undefined,
+          // $set: {
+          //      refreshToken: undefined,
+          // }
+          $unset: {
+               refreshToken: 1,
           }
      }, {
           new: true,
@@ -204,6 +208,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
+         if (!req.body) {
+          throw new apiError(400, "Request body is missing");
+     }
      const { oldPassword, newPassword } = req.body;
      const user = await User.findById(req.user?._id);
      const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
@@ -244,52 +251,52 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 });
 
-// const updateUserAvatar = asyncHandler(async (req, res) => {
-//      const avatarLocalPath = req.file?.path;
-//      if (!avatarLocalPath) {
-//           throw new apiError(400, "avatar file is missing ")
-//      }
-//      const avatar = await uploadOnCloudinary(avatarLocalPath);
-//      if (!avatar.url) {
-//           throw new apiError(400, "error while uploading on avatar")
-//      }
-//      const user = await User.findByIdAndUpdate(
-//           req.user?._id,
-//           {
-//                $set: {
-//                     avatar: avatar.url,
-//                }
-//           },
-//           {
-//                new: true
-//           }
-//      ).select("-password")
-//      return res.status(200)
-//           .json(new apiResponse(200, user, "avatar update successfully"))
-// });
-
 const updateUserAvatar = asyncHandler(async (req, res) => {
      const avatarLocalPath = req.file?.path;
      if (!avatarLocalPath) {
           throw new apiError(400, "avatar file is missing ")
      }
-     const user = await User.findById(req.user?._id);
-     if (!user) {
-          throw new apiError(404, "User not found");
-     }
-     if (user.avatar) {
-          await deleteFromCloudinary(user.avatar);
-     }
      const avatar = await uploadOnCloudinary(avatarLocalPath);
      if (!avatar.url) {
           throw new apiError(400, "error while uploading on avatar")
      }
-     user.avatar = avatar;
-     await user.save({ validateBeforeSave: false })
+     const user = await User.findByIdAndUpdate(
+          req.user?._id,
+          {
+               $set: {
+                    avatar: avatar.url,
+               }
+          },
+          {
+               new: true
+          }
+     ).select("-password")
      return res.status(200)
           .json(new apiResponse(200, user, "avatar update successfully"))
-
 });
+
+// const updateUserAvatar = asyncHandler(async (req, res) => {
+//      const avatarLocalPath = req.file?.path;
+//      if (!avatarLocalPath) {
+//           throw new apiError(400, "avatar file is missing ")
+//      }
+//      const user = await User.findById(req.user?._id);
+//      if (!user) {
+//           throw new apiError(404, "User not found");
+//      }
+//      if (user.avatar) {
+//           await deleteFromCloudinary(user.avatar);
+//      }
+//      const avatar = await uploadOnCloudinary(avatarLocalPath);
+//      if (!avatar.url) {
+//           throw new apiError(400, "error while uploading on avatar")
+//      }
+//      user.avatar = avatar;
+//      await user.save({ validateBeforeSave: false })
+//      return res.status(200)
+//           .json(new apiResponse(200, user, "avatar update successfully"))
+
+// });
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
      const coverImageLocalPath = req.file?.path;
@@ -345,7 +352,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                }
           },
           {
-               $addField: {
+               $addFields: {
                     subscriberCount: {
                          $size: "$subscribers"
                     },
@@ -395,16 +402,16 @@ const getWatchHistory=asyncHandler(async (req,res) => {
           },
           {
                $lookup:{              // nested pipeline
-                    from:"videeos",
+                    from:"videos",
                     localField:"watchHistory",
-                    foreginField:"_id",
+                    foreignField:"_id",
                     as:"watchHistory",
                     pipeline:[
                          {
                                 $lookup:{
                                    from:"users",
                                    localField:"owner",
-                                   foreginField:"_id",
+                                   foreignField:"_id",
                                    as:"owner",
                                    pipeline:[
                                         {
@@ -420,7 +427,7 @@ const getWatchHistory=asyncHandler(async (req,res) => {
                                 }
                          },
                          {
-                              $addFilds:{
+                              $addFields:{
                                    owner:{
                                         $first:"$owner"
                                    }
