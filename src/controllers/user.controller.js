@@ -1,7 +1,7 @@
 import asyncHandler from '../utils/handler.js';
 import apiError from "../utils/apiError.js";
 import { User } from "../models/user.models.js";
-import uploadOnCloudinary from "../utils/cloudinary.js";
+import {uploadOnCloudinary,deleteOnCloudinary }from "../utils/cloudinary.js";
 import apiResponse from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import deleteFromCloudinary from '../utils/deleteFromCloudinary.js';
@@ -421,6 +421,7 @@ const getWatchHistory=asyncHandler(async (req,res) => {
                                                   avatar:1,
 
                                              }
+                                        
                                         }
                                    ]
 
