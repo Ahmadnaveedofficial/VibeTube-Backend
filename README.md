@@ -70,6 +70,10 @@ It focuses on:
 
 ---
 
+# 🗂️ Data Models
+-- VibeTube Backend uses the following MongoDB models:
+check out the ```bash https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj
+
 # 🧠 Advanced Concepts Used
 
 - MongoDB Aggregation Pipeline
@@ -96,3 +100,4 @@ npm install
 
 ## 3️⃣Start Development Server
 npm run server
+
