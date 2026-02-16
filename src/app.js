@@ -18,12 +18,16 @@ import userRoutes from './routes/user.routes.js';
 import videoRoutes from './routes/video.route.js';
 import tweetRoutes from './routes/tweet.route.js';
 import subscriptionRouter  from './routes/subscription.route.js';
+import playlistRouter from "./routes/playlist.route.js";
+import healthcheckRouter  from "./routes/healthcheck.route.js";
 
 //routes declaration
 app.use('/api/v1/users',userRoutes);
 app.use('/api/v1/videos',videoRoutes);
 app.use('/api/v1/tweets',tweetRoutes);
 app.use("/api/v1/subscriptions", subscriptionRouter);
+app.use("/api/v1/playlist",playlistRouter);
+app.use("/api/v1/healthcheck", healthcheckRouter);
 
 
 
