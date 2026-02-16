@@ -1,7 +1,7 @@
 import asyncHandler from '../utils/handler.js';
 import apiError from "../utils/apiError.js";
 import { User } from "../models/user.models.js";
-import {uploadOnCloudinary,deleteOnCloudinary }from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
 import apiResponse from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import deleteFromCloudinary from '../utils/deleteFromCloudinary.js';
@@ -75,8 +75,14 @@ const registerUser = asyncHandler(async (req, res, next) => {
      }
      const user = await User.create({
           fullname,
-          avatar: avatar.url,
-          coverImage: coverImage?.url || " ",
+          avatar: {
+               public_id: avatar.public_id,
+               url: avatar.secure_url,
+          },
+          coverImage: {
+               public_id: coverImage.public_id || "",
+               url: coverImage?.secure_url || ""
+          },
           email,
           password,
           username: username.toLowerCase(),
@@ -208,7 +214,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-         if (!req.body) {
+     if (!req.body) {
           throw new apiError(400, "Request body is missing");
      }
      const { oldPassword, newPassword } = req.body;
@@ -260,11 +266,18 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
      if (!avatar.url) {
           throw new apiError(400, "error while uploading on avatar")
      }
-     const user = await User.findByIdAndUpdate(
+     const user = await User.findById(req.user?._id).select("avatar");
+     if (user?.avatar?.public_id) {
+          await deleteFromCloudinary(user.avatar.public_id);
+     }
+     const updatedUser = await User.findByIdAndUpdate(
           req.user?._id,
           {
                $set: {
-                    avatar: avatar.url,
+                    avatar: {
+                         public_id: avatar.public_id,
+                         url: avatar.secure_url,
+                    }
                }
           },
           {
@@ -272,31 +285,10 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
           }
      ).select("-password")
      return res.status(200)
-          .json(new apiResponse(200, user, "avatar update successfully"))
+          .json(new apiResponse(200, updatedUser, "avatar update successfully"))
 });
 
-// const updateUserAvatar = asyncHandler(async (req, res) => {
-//      const avatarLocalPath = req.file?.path;
-//      if (!avatarLocalPath) {
-//           throw new apiError(400, "avatar file is missing ")
-//      }
-//      const user = await User.findById(req.user?._id);
-//      if (!user) {
-//           throw new apiError(404, "User not found");
-//      }
-//      if (user.avatar) {
-//           await deleteFromCloudinary(user.avatar);
-//      }
-//      const avatar = await uploadOnCloudinary(avatarLocalPath);
-//      if (!avatar.url) {
-//           throw new apiError(400, "error while uploading on avatar")
-//      }
-//      user.avatar = avatar;
-//      await user.save({ validateBeforeSave: false })
-//      return res.status(200)
-//           .json(new apiResponse(200, user, "avatar update successfully"))
 
-// });
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
      const coverImageLocalPath = req.file?.path;
@@ -307,7 +299,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
      if (!coverImage.url) {
           throw new apiError(400, "error while uploading on coverImage")
      }
-     const user = await User.findByIdAndUpdate(
+     const user = await User.findById(req.user?._id).select("coverImage");
+     if (user?.coverImage?.public_id) {
+          await deleteFromCloudinary(user.coverImage.public_id);
+     }
+     const updatedUser  = await User.findByIdAndUpdate(
           req.user?._id,
           {
                $set: {
@@ -320,7 +316,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
      ).select("-password");
 
      return res.status(200)
-          .json(new apiResponse(200, user, "cover Image update successfully"))
+          .json(new apiResponse(200, updatedUser , "cover Image update successfully"))
 });
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
@@ -392,45 +388,45 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
 });
 
-const getWatchHistory=asyncHandler(async (req,res) => {
-     const user=await User.aggregate([
+const getWatchHistory = asyncHandler(async (req, res) => {
+     const user = await User.aggregate([
           {
-               $match:{
+               $match: {
                     // _id:req.user._id     wrong in pipeline   // aggregation code same jata ha directly not handle automatic 
-                    _id:new mongoose.Types.ObjectId(req.user._id )   // aggregation code same jata ha directly not handle automatic 
+                    _id: new mongoose.Types.ObjectId(req.user._id)   // aggregation code same jata ha directly not handle automatic 
                }
           },
           {
-               $lookup:{              // nested pipeline
-                    from:"videos",
-                    localField:"watchHistory",
-                    foreignField:"_id",
-                    as:"watchHistory",
-                    pipeline:[
+               $lookup: {              // nested pipeline
+                    from: "videos",
+                    localField: "watchHistory",
+                    foreignField: "_id",
+                    as: "watchHistory",
+                    pipeline: [
                          {
-                                $lookup:{
-                                   from:"users",
-                                   localField:"owner",
-                                   foreignField:"_id",
-                                   as:"owner",
-                                   pipeline:[
+                              $lookup: {
+                                   from: "users",
+                                   localField: "owner",
+                                   foreignField: "_id",
+                                   as: "owner",
+                                   pipeline: [
                                         {
-                                             $project:{
-                                                  fullname:1,
-                                                  username:1,
-                                                  avatar:1,
+                                             $project: {
+                                                  fullname: 1,
+                                                  username: 1,
+                                                  avatar: 1,
 
                                              }
-                                        
+
                                         }
                                    ]
 
-                                }
+                              }
                          },
                          {
-                              $addFields:{
-                                   owner:{
-                                        $first:"$owner"
+                              $addFields: {
+                                   owner: {
+                                        $first: "$owner"
                                    }
                               }
                          }
@@ -440,7 +436,7 @@ const getWatchHistory=asyncHandler(async (req,res) => {
      ])
 
      return res.status(200)
-     .json(new apiResponse(200,user[0].watchHistory,"Watch History fetch Successfully"))
+          .json(new apiResponse(200, user[0].watchHistory, "Watch History fetch Successfully"))
 });
 export {
      registerUser,
