@@ -111,7 +111,9 @@ Relationships are handled using MongoDB references and Aggregation `$lookup`.
 git clone https://github.com/Ahmadnaveedofficial/VibeTube-Backend.git
 ```
 ## 2️⃣ Navigate into Project
+``` bash
 cd VibeTube-Backend
+```
 ## 3️⃣ Install Dependencies
 ``` bash
 npm install
@@ -134,3 +136,4 @@ You are free to use, modify, and distribute this software with proper attributio
 
 # © Copyright
 © 2026 Ahmad Naveed. All Rights Reserved.
+
