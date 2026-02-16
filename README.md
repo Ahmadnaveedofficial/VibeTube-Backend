@@ -71,11 +71,23 @@ It focuses on:
 ---
 
 # 🗂️ Data Models
--- VibeTube Backend uses the following MongoDB models:
-check out the 
-```bash 
-https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj
-```
+
+VibeTube Backend uses the following MongoDB models:
+
+👉 **Database & System Design Diagram:**  
+[View Architecture Diagram](https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj)
+
+Main Models:
+
+- User  
+- Video  
+- Like  
+- Subscription  
+- Comment  
+
+Relationships are handled using MongoDB references and Aggregation `$lookup`.
+
+---
 
 # 🧠 Advanced Concepts Used
 
@@ -97,12 +109,28 @@ https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj
 
 ```bash
 git clone https://github.com/Ahmadnaveedofficial/VibeTube-Backend.git
-
-## 2️⃣ Install Dependencies
+```
+## 2️⃣ Navigate into Project
+cd VibeTube-Backend
+## 3️⃣ Install Dependencies
+``` bash
 npm install
-
-## 3️⃣Start Development Server
+```
+## 4️⃣Start Development Server
+```bash
 npm run server
+```
 
+# 👨‍💻 Author
 
+Muhammad Ahmad Naveed
+Full Stack Developer
 
+# 📜 License
+
+This project is licensed under the MIT License.
+
+You are free to use, modify, and distribute this software with proper attribution.
+
+# © Copyright
+© 2026 Ahmad Naveed. All Rights Reserved.
