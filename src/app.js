@@ -20,6 +20,7 @@ import tweetRoutes from './routes/tweet.route.js';
 import subscriptionRouter  from './routes/subscription.route.js';
 import playlistRouter from "./routes/playlist.route.js";
 import healthcheckRouter  from "./routes/healthcheck.route.js";
+import dashboardRouter from "./routes/dashboard.route.js";
 
 //routes declaration
 app.use('/api/v1/users',userRoutes);
@@ -28,6 +29,7 @@ app.use('/api/v1/tweets',tweetRoutes);
 app.use("/api/v1/subscriptions", subscriptionRouter);
 app.use("/api/v1/playlist",playlistRouter);
 app.use("/api/v1/healthcheck", healthcheckRouter);
+app.use("/api/v1/dashboard",dashboardRouter);
 
 
 
