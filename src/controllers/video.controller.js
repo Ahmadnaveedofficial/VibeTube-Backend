@@ -1,12 +1,12 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { User } from "../models/user.model.js";
+import { User } from "../models/user.models.js";
 import { uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
 import { Video } from "../models/video.models.js";
 import { Like } from "../models/like.model.js";
 import { Comment } from "../models/comment.model.js";
 import apiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
-import asyncHandler from "express-async-handler.js";
+import asyncHandler from "../utils/handler.js";
 
 
 const getAllVideos = asyncHandler(async (req, res) => {

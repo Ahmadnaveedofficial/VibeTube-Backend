@@ -4,7 +4,7 @@ import { Video } from "../models/video.models.js";
 import { Like } from "../models/like.model.js";
 import apiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
-import asyncHandler from "../utils/cloudinary.js";
+import asyncHandler from "../utils/handler.js";
 
 
 // get all comments of a video

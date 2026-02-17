@@ -1,8 +1,8 @@
-import asyncHandler from 'express-async-handler';
+import asyncHandler from '../utils/handler.js';
 import apiError from '../utils/apiError.js';
-import apiResponse from '../utils/apiResponse';
+import apiResponse from '../utils/apiResponse.js';
 import { Tweet } from '../models/tweet.model.js';
-import { User } from '../models/user.model.js';
+import { User } from '../models/user.models.js';
 import mongoose, { isValidObjectId } from 'mongoose';
 
 
