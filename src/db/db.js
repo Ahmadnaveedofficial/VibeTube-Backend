@@ -1,5 +1,4 @@
 import  DBNAME  from "../constants.js";
-
 import mongoose  from "mongoose";
 
  const dbConfig=async () => {
