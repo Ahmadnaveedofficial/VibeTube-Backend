@@ -108,13 +108,13 @@ const loginUser = asyncHandler(async (req, res) => {
      //      // password check
      //      // access and refresh token 
      //      //  send token using cookies 
-     console.log("1 Login attempt:", req.body);
+     // console.log("1 Login attempt:", req.body);
      const { username, email, password } = req.body;
      if (!(username || email)) {
           throw new apiError(400, "Username or email is required");
      }
 
-     console.log("2 Finding user by username or email");
+     // console.log("2 Finding user by username or email");
      const user = await User.findOne({
           $or: [{ username }, { email }]
      })
@@ -122,20 +122,20 @@ const loginUser = asyncHandler(async (req, res) => {
      if (!user) {
           throw new apiError(404, "User does not exist")
      }
-     console.log("3 User found", user.username, user.email);
+     // console.log("3 User found", user.username, user.email);
      if (!password) {
           throw new apiError(400, "Password is required");
      }
-     console.log("4 Checking password");
+     // console.log("4 Checking password");
      const passwordValid = await user.isPasswordCorrect(password);
-     console.log("5 Password valid:", passwordValid);
+     // console.log("5 Password valid:", passwordValid);
      if (!passwordValid) {
           throw new apiError(401, "Invalid user credentials");
      }
 
-     console.log("6 Generating tokens");
+     // console.log("6 Generating tokens");
      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
-     console.log("7 Tokens generated successfully");
+     // console.log("7 Tokens generated successfully");
      const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
      const options = {
@@ -143,7 +143,7 @@ const loginUser = asyncHandler(async (req, res) => {
           secure: true
      }
 
-     console.log("8. Sending response...");
+     // console.log("8. Sending response...");
      return res
           .status(200)
           .cookie("accessToken", accessToken, options)
