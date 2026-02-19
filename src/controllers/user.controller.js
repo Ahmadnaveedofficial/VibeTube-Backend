@@ -25,25 +25,9 @@ const generateAccessAndRefreshTokens = async (userId) => {
 }
 
 
-
-
 const registerUser = asyncHandler(async (req, res, next) => {
      const { email, fullname, password, username } = req.body;
-     //    console.log("email: ", email);
-     //    console.log("fullname: ", fullname);
-     //    console.log("password: ", password);
-     //    console.log("username: ", username);
-     //    console.log("FILES:", req.files);
-     // console.log("BODY:", req.body);
 
-     //    res.status(201).json({
-     //        success:true,
-     //        message:"User registered successfully"
-     //    });
-
-     // if ([fullname,password,email,username].some((field)=>field?.trim()==="")) {
-     //      throw new apiError(400,"All fiels are required");
-     // }
      if ([fullname, password, email, username].some(f => !f?.trim())) {
           throw new apiError(400, "All fields are required");
      }
@@ -51,13 +35,12 @@ const registerUser = asyncHandler(async (req, res, next) => {
      const existedUser = await User.findOne({
           $or: [{ username }, { email }]
      })
-     // console.log("existedUser: ", existedUser);
+
      if (existedUser) {
           throw new apiError(409, "Email and Username already exist");
      }
 
      const avatarLocalPath = req.files?.avatar[0]?.path;
-     // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
      let coverImageLocalPath;
      if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
@@ -108,13 +91,12 @@ const loginUser = asyncHandler(async (req, res) => {
      //      // password check
      //      // access and refresh token 
      //      //  send token using cookies 
-     // console.log("1 Login attempt:", req.body);
+
      const { username, email, password } = req.body;
      if (!(username || email)) {
           throw new apiError(400, "Username or email is required");
      }
 
-     // console.log("2 Finding user by username or email");
      const user = await User.findOne({
           $or: [{ username }, { email }]
      })
@@ -122,20 +104,19 @@ const loginUser = asyncHandler(async (req, res) => {
      if (!user) {
           throw new apiError(404, "User does not exist")
      }
-     // console.log("3 User found", user.username, user.email);
+ 
      if (!password) {
           throw new apiError(400, "Password is required");
      }
-     // console.log("4 Checking password");
+    
      const passwordValid = await user.isPasswordCorrect(password);
-     // console.log("5 Password valid:", passwordValid);
+    
      if (!passwordValid) {
           throw new apiError(401, "Invalid user credentials");
      }
 
-     // console.log("6 Generating tokens");
      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
-     // console.log("7 Tokens generated successfully");
+    
      const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
      const options = {
@@ -143,7 +124,6 @@ const loginUser = asyncHandler(async (req, res) => {
           secure: true
      }
 
-     // console.log("8. Sending response...");
      return res
           .status(200)
           .cookie("accessToken", accessToken, options)
